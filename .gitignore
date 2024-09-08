@@ -1,0 +1,13 @@
+# Default ignored files
+*.pyc
+*.log
+.venv/
+**.pyc
+*.log.*
+*.avi
+.idea/*
+*.spec
+.vscode/
+build/
+dist/
+*.bat
