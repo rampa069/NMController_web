@@ -95,6 +95,10 @@ if __name__ == "__main__":
     print("NM centralize monitor server running...")
     print("NMMiner firmware version v0.3.01 or later is required.")
     print(f"Access it in your LAN at http://{local_ip}:{port} or http://localhost:{port}")
+    cwd = os.getcwd()
+    if '.app/Contents/Resources' in cwd:
+        print('running on macOS')
+        os.system('open "http://127.0.0.1:7877"')
     waitress.serve(app, host='0.0.0.0', port=port)
     is_running = False
     print("Web monitor is closed.")
