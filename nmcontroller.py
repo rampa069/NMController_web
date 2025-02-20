@@ -58,12 +58,14 @@ def web_monitor():
 
         upTime, _ = split_time_string(miner_data.get('Uptime', '0'))
 
+        rejected, accepted, percentage = miner_data.get("Share", 0).split('/')
+
         # Append relevant miner details
         nmminer_list.append([
             miner_data.get('ip', 'Unknown'),
             miner_data.get("BoardType", 'Unknown'),
             miner_data.get('HashRate', '0')[:-4],
-            miner_data.get("Share", 0),
+            f'{rejected}/{accepted} ({percentage})',
             miner_data.get('NetDiff', 0),
             miner_data.get('BestDiff', 0),
             miner_data.get('Valid', 0),
