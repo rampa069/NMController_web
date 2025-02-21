@@ -63,6 +63,26 @@
             color: rgba(255, 255, 255, 0.7);
         }
 
+        .idle {
+            color: green;
+            font-weight: bold;
+        }
+
+        .under-load {
+            color: orange;
+            font-weight: bold;
+        }
+
+        .dangerous {
+            color: red;
+            font-weight: bold;
+        }
+
+        .unknown {
+            color: gray;
+            font-style: italic;
+        }
+
         .red-text {
             color: red;
         }
@@ -163,22 +183,27 @@
                 <td style="text-align: right;">{{ row[3] }}</td>
                 <td>{{ row[5] }}</td>
                 <td>{{ row[6] }}</td>
-                <td>{{ row[7]|float|round(1) }}℃</td>
+                <td class="{% if 30 <= row[7] <= 45 %}idle
+                           {% elif 50 <= row[7] <= 70 %}under-load
+                           {% elif row[7] > 80 %}dangerous
+                           {% else %}unknown{% endif %}">
+                    {{ row[7]|float|round(1) }}℃
+                </td>
                 <td class="
-          {% if row[8] >= -50 %}
-            rssi-excellent
-          {% elif row[8] >= -60 %}
-            rssi-good
-          {% elif row[8] >= -67 %}
-            rssi-fair
-          {% elif row[8] >= -70 %}
-            rssi-poor
-          {% elif row[8] >= -80 %}
-            rssi-very-poor
-          {% else %}
-            rssi-extremely-poor
-          {% endif %}
-        ">
+                  {% if row[8] >= -50 %}
+                    rssi-excellent
+                  {% elif row[8] >= -60 %}
+                    rssi-good
+                  {% elif row[8] >= -67 %}
+                    rssi-fair
+                  {% elif row[8] >= -70 %}
+                    rssi-poor
+                  {% elif row[8] >= -80 %}
+                    rssi-very-poor
+                  {% else %}
+                    rssi-extremely-poor
+                  {% endif %}
+                ">
                     {{ row[8] }}
                 </td>
                 <td>{{ row[9]|float|round(2) }}</td>
@@ -190,7 +215,9 @@
     </table>
 
     <div style="text-align: center; margin-top: 20px;">
-        <h5 style="color: white;">* Latest firmware version is <a href="https://github.com/NMminer1024/NMMiner/releases/latest" target="_blank" rel="noopener noreferrer" style="color: #00FF00; text-decoration: none;">{{ latest_version }}</a></h5>
+        <h5 style="color: white;">* Latest firmware version is <a
+                href="https://github.com/NMminer1024/NMMiner/releases/latest" target="_blank" rel="noopener noreferrer"
+                style="color: #00FF00; text-decoration: none;">{{ latest_version }}</a></h5>
     </div>
 
     <div style="text-align: center; margin-top: 20px;">
