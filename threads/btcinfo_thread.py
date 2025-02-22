@@ -56,19 +56,19 @@ class BtcInfoThread(ManagedThread):
             # Calculate block reward value in USD
             self.block_reward_value = round(self.block_reward * self.btc_price, 2)
 
-            logging.info(f"[BtcInfoThread] BTC Price: ${self.btc_price}, Block Reward: {self.block_reward} BTC, Reward Value: ${self.block_reward_value}")
-
         except requests.RequestException as e:
-            logging.error(f"[BtcInfoThread] Error fetching data: {e}", exc_info=True)
+            logging.error(f"[BtcInfoThread] Error fetching data from blockchain.info: {e}", exc_info=True)
         except ValueError as e:
-            logging.error(f"[BtcInfoThread] Unexpected data format: {e}", exc_info=True)
+            logging.error(f"[BtcInfoThread] Unexpected data format from blockchain.info: {e}", exc_info=True)
         except Exception as e:
             # Generic exception catch for anything that isn't already caught
-            logging.error(f"[BtcInfoThread] Unexpected error: {e}", exc_info=True)
+            logging.error(f"[BtcInfoThread] Unexpected error from blockchain.info: {e}", exc_info=True)
 
             # We want to continue on so without this info so zero out what we have
             self.block_reward = 0.0
             self.block_reward_value = 0.00
+
+        logging.info(f"[BtcInfoThread] BTC Price: ${self.btc_price}, Block Reward: {self.block_reward} BTC, Reward Value: ${self.block_reward_value}")
 
     @staticmethod
     def get_btc_price():
