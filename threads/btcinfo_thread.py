@@ -67,7 +67,6 @@ class BtcInfoThread(ManagedThread):
             logging.error(f"[BtcInfoThread] Unexpected error: {e}", exc_info=True)
 
             # We want to continue on so without this info so zero out what we have
-            self.btc_price = 0.0
             self.block_reward = 0.0
             self.block_reward_value = 0.00
 
