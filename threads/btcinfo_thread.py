@@ -12,37 +12,37 @@ BTC_PRICE_API_SOURCES = [
     {
         "name": "Coingecko",
         "url": "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd",
-        "parser": lambda price_data: round(data["bitcoin"]["usd"], 2)
+        "parser": lambda price_data: round(price_data["bitcoin"]["usd"], 2)
     },
     {
         "name": "Kraken",
         "url": "https://api.kraken.com/0/public/Ticker?pair=XBTUSD",
-        "parser": lambda price_data: round(float(data["result"]["XXBTZUSD"]["c"][0]), 2)
+        "parser": lambda price_data: round(float(price_data["result"]["XXBTZUSD"]["c"][0]), 2)
     },
     {
         "name": "OKX",
         "url": "https://www.okx.com/api/v5/market/ticker?instId=BTC-USDT",
-        "parser": lambda price_data: round(float(data["data"][0]["last"]), 2)
+        "parser": lambda price_data: round(float(price_data["data"][0]["last"]), 2)
     },
     {
         "name": "Bitstamp",
         "url": "https://www.bitstamp.net/api/v2/ticker/btcusd/",
-        "parser": lambda price_data: round(float(data["last"]), 2)
+        "parser": lambda price_data: round(float(price_data["last"]), 2)
     },
     {
         "name": "Huobi",
         "url": "https://api.huobi.pro/market/detail/merged?symbol=btcusdt",
-        "parser": lambda price_data: round(float(data["tick"]["close"]), 2)
+        "parser": lambda price_data: round(float(price_data["tick"]["close"]), 2)
     },
     {
         "name": "ByBit",
         "url": "https://api.bybit.com/v2/public/tickers?symbol=BTCUSD",
-        "parser": lambda price_data: round(float(data["result"][0]["last_price"]), 2)
+        "parser": lambda price_data: round(float(price_data["result"][0]["last_price"]), 2)
     },
     {
         "name": "MEXC",
         "url": "https://api.mexc.com/api/v3/ticker/price?symbol=BTCUSDT",
-        "parser": lambda price_data: round(float(data["price"]), 2)
+        "parser": lambda price_data: round(float(price_data["price"]), 2)
     },
 ]
 
