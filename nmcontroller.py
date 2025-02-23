@@ -74,7 +74,8 @@ def web_monitor():
             round(miner_data.get('FreeHeap', 0.0), 2),
             version,
             compact_uptime(upTime),
-            time_difference(miner_data.get('UpdateTime', 'Unknown'))
+            time_difference(miner_data.get('UpdateTime', 'Unknown')),
+            miner_data.get('LastDiff', 0),
         ])
 
         # Convert and accumulate hashrate

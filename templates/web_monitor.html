@@ -170,6 +170,7 @@
             <th>IP</th>
             <th>Hash Rate<br>(Kh/s)</th>
             <th>Share<br>(Reject/Accept)</th>
+            <th>Last Diff</th>
             <th>Best Diff</th>
             <th>Valid</th>
             <th>Temp</th>
@@ -186,6 +187,7 @@
                     {{ row[2] }}
                 </td>
                 <td style="text-align: right;">{{ row[3] }}</td>
+                <td>{{ row[13] }}</td>
                 <td>{{ row[5] }}</td>
                 <td>{{ row[6] }}</td>
                 <td class="{% if row[7] < 30 %}cpu_temp_cold
