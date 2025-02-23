@@ -347,7 +347,8 @@
                 <td>{{ row[6] }}</td>
                 <td class="{% if row[7] < 30 %}cpu_temp_cold
                            {% elif 30 <= row[7] <= 45 %}cpu_temp_idle
-                           {% elif 50 <= row[7] <= 70 %}cpu_temp_under-load
+                           {% elif 45 <= row[7] <= 70 %}cpu_temp_under-load
+                           {% elif 70 <= row[7] <= 80 %}cpu_temp_warning
                            {% elif row[7] > 80 %}cpu_temp_dangerous
                            {% else %}cpu_temp_unknown{% endif %}">
                     {{ row[7]|float|round(1) }}℃
