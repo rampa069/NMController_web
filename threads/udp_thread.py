@@ -9,6 +9,7 @@ from threads.managed_thread import ManagedThread
 # Configure logging for better debugging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 
+
 class UbpThread(ManagedThread):
     """
     Singleton UDP listener thread for receiving and processing NMMiner data.
@@ -27,11 +28,11 @@ class UbpThread(ManagedThread):
                 cls._instance._initialized = False  # Flag to check initialization
         return cls._instance
 
+
     def __init__(self, name="UbpThread", ip="0.0.0.0", port=12345, update_seconds=0.5):
         """Initializes the UDP listener thread."""
         if self._initialized:
             return  # Prevent re-initialization if already initialized
-
         super().__init__(name=name, update_seconds=update_seconds)
 
         self.lock = threading.Lock()  # Lock for thread-safe updates
@@ -125,6 +126,7 @@ if __name__ == "__main__":
     udp_thread_2 = UbpThread()  # This should return the same instance
 
     print(f"Both instances are the same: {udp_thread_1 is udp_thread_2}")  # Should print True
+
 
     time.sleep(10)  # Let it run for a while
     udp_thread_1.stop()  # Stop the listener
