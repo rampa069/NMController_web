@@ -10,7 +10,7 @@ from threads.managed_thread import ManagedThread
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 
 
-class UbpThread(ManagedThread):
+class UdpThread(ManagedThread):
     """
     Singleton UDP listener thread for receiving and processing NMMiner data.
     This class continuously listens for UDP packets, parses JSON data,
@@ -24,12 +24,12 @@ class UbpThread(ManagedThread):
         """Ensure only one instance is created."""
         with cls._lock:
             if cls._instance is None:
-                cls._instance = super(UbpThread, cls).__new__(cls)
+                cls._instance = super(UdpThread, cls).__new__(cls)
                 cls._instance._initialized = False  # Flag to check initialization
         return cls._instance
 
 
-    def __init__(self, name="UbpThread", ip="0.0.0.0", port=12345, update_seconds=0.5):
+    def __init__(self, name="UdpThread", ip="0.0.0.0", port=12345, update_seconds=0.5):
         """Initializes the UDP listener thread."""
         if self._initialized:
             return  # Prevent re-initialization if already initialized
@@ -122,8 +122,8 @@ class UbpThread(ManagedThread):
 
 # Usage Example:
 if __name__ == "__main__":
-    udp_thread_1 = UbpThread(port=12345, update_seconds=1)
-    udp_thread_2 = UbpThread()  # This should return the same instance
+    udp_thread_1 = UdpThread(port=12345, update_seconds=1)
+    udp_thread_2 = UdpThread()  # This should return the same instance
 
     print(f"Both instances are the same: {udp_thread_1 is udp_thread_2}")  # Should print True
 
