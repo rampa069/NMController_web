@@ -61,39 +61,57 @@
 
         td {
             color: rgba(255, 255, 255, 0.7);
+            transition: background-color 0.3s ease, transform 0.2s ease;
         }
 
-.cpu_temp_cold {
-    color: deepskyblue; 
-}
+        /* Hover Effects */
+        td:hover {
+            transform: scale(1.05); /* Slightly enlarge on hover */
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        }
 
-.cpu_temp_idle {
-    color: green;
-}
 
-.cpu_temp_under-load {
-    color: gold;
-}
+        /* CPU Temp styles */
 
-.cpu_temp_warning {
-    background-color: orange;
-    color: black;
-}
+        /* Warning Pulse Animation */
+        @keyframes pulse {
+            0% { background-color: #FF4500; }
+            100% { background-color: #FF6347; } /* Lighter Tomato Red */
+        }
 
-.cpu_temp_dangerous {
-    background-color: red;
-    color: white;
-}
+        .cpu_temp_cold {
+            color: deepskyblue;
+        }
 
-.cpu_temp_unknown {
-    background-color: #808080; /* Gray */
-    color: white;
-}
+        .cpu_temp_idle {
+            color: green;
+        }
 
+        .cpu_temp_under-load {
+            color: gold;
+        }
+
+        .cpu_temp_warning {
+            background-color: orange;
+            color: black;
+        }
+
+        .cpu_temp_dangerous {
+            background-color: red;
+            color: white;
+            animation: pulse 1.5s infinite alternate ease-in-out;
+        }
+
+        .cpu_temp_unknown {
+            background-color: #808080; /* Gray */
+            color: white;
+        }
 
         .red-text {
             color: red;
         }
+
+        /* RSSI dBm quality styles */
 
         .rssi-excellent {
             background-color: rgba(0, 255, 0, 0.4);
