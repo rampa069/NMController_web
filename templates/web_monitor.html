@@ -63,22 +63,27 @@
             color: rgba(255, 255, 255, 0.7);
         }
 
-        .idle {
+        .cpu_temp_cold {
+            color: mediumturquoise;
+            font-weight: bold;
+        }
+
+        .cpu_temp_idle {
             color: green;
             font-weight: bold;
         }
 
-        .under-load {
+        .cpu_temp_under-load {
             color: orange;
             font-weight: bold;
         }
 
-        .dangerous {
+        .cpu_temp_dangerous {
             color: red;
             font-weight: bold;
         }
 
-        .unknown {
+        .cpu_temp_unknown {
             color: gray;
             font-style: italic;
         }
@@ -183,10 +188,11 @@
                 <td style="text-align: right;">{{ row[3] }}</td>
                 <td>{{ row[5] }}</td>
                 <td>{{ row[6] }}</td>
-                <td class="{% if 30 <= row[7] <= 45 %}idle
-                           {% elif 50 <= row[7] <= 70 %}under-load
-                           {% elif row[7] > 80 %}dangerous
-                           {% else %}unknown{% endif %}">
+                <td class="{% if row[7] < 30 %}cpu_temp_cold
+                           {% elif 30 <= row[7] <= 45 %}cpu_temp_idle
+                           {% elif 50 <= row[7] <= 70 %}cpu_temp_under-load
+                           {% elif row[7] > 80 %}cpu_temp_dangerous
+                           {% else %}cpu_temp_unknown{% endif %}">
                     {{ row[7]|float|round(1) }}℃
                 </td>
                 <td class="
