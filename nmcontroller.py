@@ -64,7 +64,7 @@ def web_monitor():
         nmminer_list.append([
             miner_data.get('ip', 'Unknown'),
             miner_data.get("BoardType", 'Unknown'),
-            miner_data.get('HashRate', '0')[:-4],
+            miner_data.get('HashRate', '0'),
             f'{rejected}/{accepted} ({percentage})',
             miner_data.get('NetDiff', 0),
             miner_data.get('BestDiff', 0),
