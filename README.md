@@ -50,7 +50,7 @@ The Web NMController will run on your local ip, port 7877. Enter the "http://127
 
 The Web Controller runs like this:
 
-![web_monitor](pic/web_monitor2.png)
+![web_monitor](pic/web_monitor.png)
 
 The page will refresh every 5 seconds.
 
