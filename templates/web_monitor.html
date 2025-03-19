@@ -149,6 +149,37 @@
             color: #E0E0E0;
         }
 
+        .rssi-tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+        }
+
+        .rssi-tooltip .tooltip-text {
+            visibility: hidden;
+            opacity: 0;
+            background-color: black;
+            color: white;
+            text-align: center;
+            padding: 2px 5px;
+            border-radius: 5px;
+            font-size: 12px;
+            position: absolute;
+            bottom: 120%; /* Positions above text */
+            left: 50%;
+            transform: translateX(-50%);
+            white-space: nowrap;
+            z-index: 10;
+            transition: opacity 0.2s ease-in-out;
+        }
+
+        .rssi-tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+
+
+
         #container {
             text-align: center;
             width: 100%;
@@ -418,7 +449,18 @@
                     rssi-extremely-poor
                   {% endif %}
                 ">
-                    {{ row[8] }}
+                    <span class="rssi-tooltip">
+                        {{ row[8] }}
+                        <span class="tooltip-text">
+                            {% if row[8] >= -50 %} Excellent (-50 dBm and above)
+                            {% elif row[8] >= -60 %} Good (-60 dBm to -51 dBm)
+                            {% elif row[8] >= -67 %} Fair (-67 dBm to -61 dBm)
+                            {% elif row[8] >= -70 %} Poor (-70 dBm to -68 dBm)
+                            {% elif row[8] >= -80 %} Very Poor (-80 dBm to -71 dBm)
+                            {% else %} Extremely Poor (Below -80 dBm)
+                            {% endif %}
+                        </span>
+                    </span>
                 </td>
                 <td>{{ row[9]|float|round(2) }}</td>
                 <td class="{% if row[10].endswith('*') %}red-text{% endif %}">{{ row[10] }}</td>
