@@ -371,13 +371,21 @@
             }
             
             // Handle checkboxes (they won't be in formData if unchecked)
-            const checkboxes = ['SaveUptime', 'LedEnable', 'RotateScreen', 'BTCPrice', 'AutoBrightness'];
+            const checkboxes = [
+                {name: 'SaveUptime', id: 'save_uptime'},
+                {name: 'LedEnable', id: 'led_enable'},
+                {name: 'RotateScreen', id: 'rotate_screen'},
+                {name: 'BTCPrice', id: 'btc_price'},
+                {name: 'AutoBrightness', id: 'auto_brightness'}
+            ];
             checkboxes.forEach(checkbox => {
-                config[checkbox] = document.getElementById(checkbox.toLowerCase()).checked;
+                config[checkbox.name] = document.getElementById(checkbox.id).checked;
             });
             
             // Add IP to config
             config.IP = '{{ device_ip }}';
+            
+            console.log('Sending config:', config); // Debug
             
             try {
                 const response = await fetch('/api/config/{{ device_ip }}', {
@@ -389,6 +397,7 @@
                 });
                 
                 const result = await response.json();
+                console.log('Response:', result); // Debug
                 
                 if (response.ok && result.success) {
                     await Swal.fire({
@@ -397,7 +406,13 @@
                         icon: 'success',
                         confirmButtonText: 'OK'
                     });
-                    window.location.href = '/';
+                    
+                    // Close popup if opened in popup window, otherwise redirect
+                    if (window.opener) {
+                        window.close();
+                    } else {
+                        window.location.href = '/';
+                    }
                 } else {
                     await Swal.fire({
                         title: 'Error',
@@ -407,6 +422,7 @@
                     });
                 }
             } catch (error) {
+                console.error('Config save error:', error); // Debug
                 await Swal.fire({
                     title: 'Error',
                     text: 'Network error: ' + error.message,

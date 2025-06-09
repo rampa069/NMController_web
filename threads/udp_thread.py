@@ -44,6 +44,7 @@ class UdpThread(ManagedThread):
         self.nmminer_map = {}  # Dictionary to store miner data
         self.status_sock = None
         self.config_sock = None
+        self.last_cleanup_time = 0  # Track last cleanup time
 
         # Only initialize sockets if not already done
         if UdpThread.status_sock is None:
@@ -87,7 +88,34 @@ class UdpThread(ManagedThread):
     def get_miner_map(self):
         """Retrieves the current miner data map."""
         with self.lock:
+            # Only cleanup periodically (every 60 seconds) instead of every request
+            current_time = time.time()
+            if current_time - self.last_cleanup_time > 60:
+                self._cleanup_offline_devices()
+                self.last_cleanup_time = current_time
             return self.nmminer_map.copy()
+    
+    def _cleanup_offline_devices(self, timeout_seconds=300):
+        """Remove devices that haven't been seen for a while (default 5 minutes)."""
+        current_time = time.time()
+        to_remove = []
+        
+        for ip, miner_data in self.nmminer_map.items():
+            update_time_str = miner_data.get('UpdateTime')
+            if update_time_str:
+                try:
+                    device_time = time.mktime(time.strptime(update_time_str, "%Y-%m-%d %H:%M:%S"))
+                    if current_time - device_time > timeout_seconds:
+                        to_remove.append(ip)
+                except ValueError:
+                    # Invalid time format, remove old entry
+                    to_remove.append(ip)
+        
+        if to_remove:
+            for ip in to_remove:
+                del self.nmminer_map[ip]
+                logging.info(f"{self.get_thread_name()} Removed offline device {ip} (last seen > {timeout_seconds}s ago)")
+            logging.info(f"{self.get_thread_name()} Cleanup removed {len(to_remove)} offline devices")
 
     def run(self):
         """Main loop of the thread. Listens for UDP messages and processes data."""
@@ -114,7 +142,7 @@ class UdpThread(ManagedThread):
         if ready[0]:
             for sock in ready[0]:
                 try:
-                    data, addr = sock.recvfrom(1024)  # Receive up to 1024 bytes
+                    data, addr = sock.recvfrom(4096)  # Receive up to 4096 bytes
                     if sock == self.status_sock:
                         logging.debug(f"{self.get_thread_name()} Status data received from {addr[0]}")
                     else:
@@ -135,19 +163,52 @@ class UdpThread(ManagedThread):
         :param addr: Address tuple (ip, port) of the sender.
         """
         try:
-            json_data = json.loads(data.decode('utf-8'))  # Ensure proper decoding
+            # Decode data and strip any trailing null bytes or whitespace
+            decoded_data = data.decode('utf-8').rstrip('\x00').strip()
+            
+            # Check if the JSON appears to be truncated (doesn't end with '}')
+            if not decoded_data.endswith('}'):
+                logging.warning(f"{self.get_thread_name()} Received truncated JSON from {addr[0]}: length={len(decoded_data)}, ends with='{decoded_data[-10:]}'")
+                return
+            
+            json_data = json.loads(decoded_data)
             ip = json_data.get("ip") or addr[0]  # Use sender IP if not in data
 
             json_data["ip"] = ip  # Ensure IP is always set
             json_data["UpdateTime"] = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
 
             with self.lock:
-                self.nmminer_map[ip] = json_data  # Store miner data by IP
+                # Determine packet type based on content
+                has_config_fields = bool(json_data.get('Version') or json_data.get('BoardType') or json_data.get('WiFiSSID'))
+                has_status_fields = bool(json_data.get('HashRate') or json_data.get('Temp') or json_data.get('RSSI'))
+                
+                if ip in self.nmminer_map:
+                    # Device exists, merge data intelligently
+                    existing_data = self.nmminer_map[ip].copy()
+                    
+                    # Always merge new data, but preserve important existing fields if not in new packet
+                    for key, value in json_data.items():
+                        if value and value != '' and value != 0:  # Only update with meaningful values
+                            existing_data[key] = value
+                    
+                    # Always update timestamp
+                    existing_data["UpdateTime"] = json_data["UpdateTime"]
+                    
+                    self.nmminer_map[ip] = existing_data
+                    
+                    packet_type = "config" if has_config_fields and not has_status_fields else "status" if has_status_fields and not has_config_fields else "mixed"
+                    logging.info(f"{self.get_thread_name()} Merged {packet_type} packet for {ip}: V={existing_data.get('Version', 'N/A')}, BT={existing_data.get('BoardType', 'N/A')}, HR={existing_data.get('HashRate', 'N/A')}")
+                else:
+                    # New device
+                    self.nmminer_map[ip] = json_data
+                    packet_type = "config" if has_config_fields else "status" if has_status_fields else "unknown"
+                    logging.info(f"{self.get_thread_name()} New device {ip} ({packet_type} packet): V={json_data.get('Version', 'N/A')}, BT={json_data.get('BoardType', 'N/A')}")
 
             logging.debug(f"{self.get_thread_name()} Updated miner data for IP: {ip}")
 
         except json.JSONDecodeError as e:
-            logging.error(f"{self.get_thread_name()} Failed to decode JSON: {data}, Error: {e}", exc_info=True)
+            decoded_data = data.decode('utf-8', errors='replace').rstrip('\x00').strip()
+            logging.error(f"{self.get_thread_name()} Failed to decode JSON from {addr[0]}: length={len(decoded_data)}, data='{decoded_data[:100]}...{decoded_data[-50:]}', Error: {e}")
         except Exception as e:
             logging.exception(f"{self.get_thread_name()} Unexpected error in JSON processing: {e}")
 

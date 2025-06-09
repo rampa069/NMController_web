@@ -65,11 +65,28 @@ def compact_uptime(original_str, strip_secs=True):
 def split_time_string(time_string):
    """
    Split a time string (formatted as 'ddd d hh:mm:ss') into two separate parts.
+   If only one time component is present, return it as the first part with empty second part.
    """
-   # Use regex to extract the time components
-   match = re.match(r'(\d+d \d{2}:\d{2}:\d{2})\s+(\d+d \d{2}:\d{2}:\d{2})', time_string.strip())
-
+   time_string = time_string.strip()
+   
+   # Try to match two time components first
+   match = re.match(r'(\d+d \d{2}:\d{2}:\d{2})\s+(\d+d \d{2}:\d{2}:\d{2})', time_string)
    if match:
       return match.groups()  # Returns tuple (first_part, second_part)
-   else:
-      raise ValueError("String format does not match expected pattern.")
+   
+   # Try to match a single time component
+   single_match = re.match(r'(\d+d \d{2}:\d{2}:\d{2})', time_string)
+   if single_match:
+      return single_match.group(1), ""  # Return single time with empty second part
+   
+   # Handle simple numeric uptime (assume seconds and convert to readable format)
+   if time_string.isdigit():
+      seconds = int(time_string)
+      days, remainder = divmod(seconds, 86400)
+      hours, remainder = divmod(remainder, 3600)
+      minutes, seconds = divmod(remainder, 60)
+      formatted_time = f"{days}d {hours:02}:{minutes:02}:{seconds:02}"
+      return formatted_time, ""
+   
+   # If no patterns match, return the original string as first part
+   return time_string, ""

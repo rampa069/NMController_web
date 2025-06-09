@@ -54,22 +54,17 @@ def web_monitor():
     total_hashrate = 0.0
     all_miners = {}
 
-    # Get data from original UDP thread
-    original_miners = udp_thread.get_miner_map()
-    all_miners.update(original_miners)
+    # Get data from UDP thread only (more reliable)
+    all_miners = udp_thread.get_miner_map()
     
-    # Get data from network discovery (merge with original data)
-    network_miners = network_manager.get_miner_map()
+    # Debug logging for data state
+    logging.info(f"Web monitor: Retrieved {len(all_miners)} devices from UDP thread")
+    for ip, data in all_miners.items():
+        logging.debug(f"Device {ip}: Version={data.get('Version', 'Missing')}, BoardType={data.get('BoardType', 'Missing')}, UpdateTime={data.get('UpdateTime', 'Missing')}")
     
-    # Merge network discovered devices with original data
-    for ip, network_data in network_miners.items():
-        if ip in all_miners:
-            # Update existing entry with network data
-            all_miners[ip].update(network_data)
-        else:
-            # Add new network device
-            all_miners[ip] = network_data
-
+    if not all_miners:
+        logging.warning("No miner data available from UDP thread")
+    
     # Process all miner data
     for miner_id, miner_data in sorted(all_miners.items()):
         version = miner_data.get('Version', 'Unknown')
@@ -140,12 +135,22 @@ def device_config(device_ip):
     """
     Configuration page for a specific device.
     """
-    # Get device info
-    device = network_manager.get_device_by_ip(device_ip)
-    config = network_manager.get_device_config(device_ip)
+    # Get device info from UDP thread
+    miner_map = udp_thread.get_miner_map()
+    device_data = miner_map.get(device_ip)
     
-    if not device:
+    if not device_data:
         return redirect(url_for('web_monitor'))
+    
+    # Create a simple device object for the template
+    device = {
+        'board_type': device_data.get('BoardType', 'Unknown'),
+        'version': device_data.get('Version', 'Unknown'),
+        'is_online': True
+    }
+    
+    # Use the device data as config if available
+    config = device_data
     
     return render_template(
         'device_config.html',
@@ -161,14 +166,10 @@ def api_device_config(device_ip):
     API endpoint for device configuration.
     """
     if request.method == 'GET':
-        # Get current configuration
-        config = network_manager.get_device_config(device_ip)
-        if config:
-            return jsonify(config)
-        else:
-            # Try to request config from device
-            config = network_manager.request_config_from_device(device_ip)
-            return jsonify(config or {})
+        # Get current configuration from UDP thread
+        miner_map = udp_thread.get_miner_map()
+        config = miner_map.get(device_ip, {})
+        return jsonify(config)
     
     elif request.method == 'POST':
         # Update device configuration
@@ -177,13 +178,23 @@ def api_device_config(device_ip):
             if not config:
                 return jsonify({'error': 'No configuration data provided'}), 400
             
-            # Send configuration to device
-            success = network_manager.send_config_to_device(device_ip, config)
+            # Send configuration to device via UDP
+            import json
+            config_data = json.dumps(config).encode('utf-8')
             
-            if success:
+            try:
+                sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+                sock.settimeout(2.0)
+                # Send to device command port (12347) - correct port for sending configs
+                sock.sendto(config_data, (device_ip, 12347))
+                sock.close()
+                
+                logging.info(f"Configuration sent to {device_ip}:12347")
                 return jsonify({'success': True, 'message': 'Configuration sent successfully'})
-            else:
-                return jsonify({'error': 'Failed to send configuration to device'}), 500
+                
+            except Exception as e:
+                logging.error(f"Error sending config to {device_ip}: {e}")
+                return jsonify({'error': f'Failed to send configuration: {str(e)}'}), 500
                 
         except Exception as e:
             logging.error(f"Error updating device config: {e}")

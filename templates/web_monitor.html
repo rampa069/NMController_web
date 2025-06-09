@@ -448,44 +448,6 @@
             document.getElementById("last-update").textContent = displayTime;
         };
 
-        /* Add a warning/error alert for miner temps */
-        document.addEventListener("DOMContentLoaded", function () {
-            const tempCells = document.querySelectorAll("td.cpu_temp_cold, td.cpu_temp_idle, td.cpu_temp_under-load, td.cpu_temp_warning, td.cpu_temp_dangerous");
-
-            tempCells.forEach(cell => {
-                let temp = parseFloat(cell.innerText);
-
-                if (temp >= 65 && temp <= 70) {
-                    Swal.fire({
-                        title: "⚠️ High CPU Temperature",
-                        text: `Your CPU temperature is at ${temp}°C. Please monitor your system.`,
-                        icon: "warning",
-                        confirmButtonText: "OK",
-                        timer: 5000
-                    });
-                } else if (temp > 70 && temp <= 80) {
-                    Swal.fire({
-                        title: "🚨 Critical CPU Temperature!",
-                        text: `Your CPU temperature is dangerously high at ${temp}°C! Immediate action required.`,
-                        icon: "error",
-                        confirmButtonText: "Understood",
-                        showCancelButton: true,
-                        cancelButtonText: "Ignore",
-                        timer: 8000
-                    });
-                } else if (temp > 80) {
-                    Swal.fire({
-                        title: "🔥 Overheating Warning!",
-                        text: `Your CPU temperature is extremely high at ${temp}°C! The device may be at risk of damage.`,
-                        icon: "error",
-                        confirmButtonText: "Shut down system",
-                        showCancelButton: true,
-                        cancelButtonText: "Ignore",
-                        timer: 8000
-                    });
-                }
-            });
-        });
 
         function parseHashRate(value) {
             const units = {
@@ -580,7 +542,17 @@
                 const cells = selectedRow.getElementsByTagName('td');
                 const ipLink = cells[0].getElementsByTagName('a')[0];
                 const ip = ipLink.textContent;
-                window.open(`/config/${ip}`, '_blank');
+                
+                // Open in popup window instead of new tab
+                const popup = window.open(`/config/${ip}`, 'deviceConfig', 
+                    'width=900,height=800,scrollbars=yes,resizable=yes,center=yes');
+                
+                if (popup) {
+                    popup.focus();
+                } else {
+                    // Fallback if popup blocked
+                    window.open(`/config/${ip}`, '_blank');
+                }
             }
             hideContextMenu();
         }
@@ -632,22 +604,22 @@
                     /* Check if the two rows should switch place,
                     based on the direction, asc or desc: */
                     if (dir == "asc") {
-                        if (n == 1) {
+                        if (n == 2) { // Hash Rate (moved from n==1)
                             if (parseHashRate(x.innerHTML) > parseHashRate(y.innerHTML)) {
                                 shouldSwitch = true;
                                 break;
                             }
-                        } else if (n == 2) {
+                        } else if (n == 3) { // Share (moved from n==2)
                             if (parseShare(x.innerHTML) > parseShare(y.innerHTML)) {
                                 shouldSwitch = true;
                                 break;
                             }
-                        } else if (n == 3) {
+                        } else if (n == 4) { // Last Diff (moved from n==3)
                             if (parseHash(x.innerHTML) > parseHash(y.innerHTML)) {
                                 shouldSwitch = true;
                                 break;
                             }
-                        } else if (n == 7) {
+                        } else if (n == 8) { // RSSI (moved from n==7)
                             if (parseInt(x.innerHTML) > parseInt(y.innerHTML)) {
                                 shouldSwitch = true;
                                 break;
@@ -660,22 +632,22 @@
                             }
                         }
                     } else if (dir == "desc") {
-                        if (n == 1) {
+                        if (n == 2) { // Hash Rate (moved from n==1)
                             if (parseHashRate(x.innerHTML) < parseHashRate(y.innerHTML)) {
                                 shouldSwitch = true;
                                 break;
                             }
-                        } else if (n == 2) {
+                        } else if (n == 3) { // Share (moved from n==2)
                             if (parseShare(x.innerHTML) < parseShare(y.innerHTML)) {
                                 shouldSwitch = true;
                                 break;
                             }
-                        } else if (n == 3) {
+                        } else if (n == 4) { // Last Diff (moved from n==3)
                             if (parseHash(x.innerHTML) < parseHash(y.innerHTML)) {
                                 shouldSwitch = true;
                                 break;
                             }
-                        } else if (n == 7) {
+                        } else if (n == 8) { // RSSI (moved from n==7)
                             if (parseInt(x.innerHTML) < parseInt(y.innerHTML)) {
                                 shouldSwitch = true;
                                 break;
@@ -734,13 +706,14 @@
     <table id="dataTable">
         <tr>
             <th onclick="sortTable(0)">IP</th>
-            <th onclick="sortTable(1)">Hash Rate</th>
-            <th onclick="sortTable(2)">Share<br>(Reject/Accept)</th>
-            <th onclick="sortTable(3)">Last Diff</th>
+            <th onclick="sortTable(1)">Board Type</th>
+            <th onclick="sortTable(2)">Hash Rate</th>
+            <th onclick="sortTable(3)">Share<br>(Reject/Accept)</th>
+            <th onclick="sortTable(4)">Last Diff</th>
             <th>Best Diff</th>
             <th>Valid</th>
             <th>Temp</th>
-            <th onclick="sortTable(7)">RSSI<br>(dBm)</th>
+            <th onclick="sortTable(8)">RSSI<br>(dBm)</th>
             <th>Free<br>Heap</th>
             <th>Version</th>
             <th>Uptime</th>
@@ -749,7 +722,7 @@
         {% for row in result %}
             <tr>
                 <td><a href="http://{{ row[0] }}" target="_blank" rel="noopener noreferrer">{{ row[0] }}</a></td>
-                <!-- <td class="{% if row[2] == 0 %}red-text{% endif %}"> -->
+                <td>{{ row[1] }}</td>
                 <td>{{ row[2] }}</td>
                 <td style="text-align: right;">{{ row[3] }}</td>
                 <td>{{ row[13] }}</td>
