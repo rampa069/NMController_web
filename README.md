@@ -68,6 +68,14 @@ Currently, the monitor will display the following information:
  - Uptime
  - Last seen/updated
 
+### Device Configuration
+
+You can configure individual devices by right-clicking on any device row in the web interface. This will open a context menu with configuration options.
+
+The configuration window allows you to modify device settings:
+
+![config_window](pic/config_window.png)
+
 ## Contact
 - Anything do not work as your expectation, just let us know.
 
