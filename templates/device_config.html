@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Device Configuration - {{ device_ip }}</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <style>
+        :root {
+            --primary-bg: #0a0a0a;
+            --secondary-bg: #1a1a1a;
+            --accent-bg: #2a2a2a;
+            --border-color: #333;
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
+            --accent-color: #00ff41;
+            --warning-color: #ff6b00;
+            --error-color: #ff0040;
+            --success-color: #00ff41;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            --border-radius: 8px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--primary-bg) 0%, var(--secondary-bg) 100%);
+            color: var(--text-primary);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--secondary-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--accent-bg) 0%, var(--border-color) 100%);
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 2rem;
+            font-weight: 300;
+            background: linear-gradient(45deg, var(--accent-color), #00d4ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .device-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .info-item {
+            text-align: center;
+        }
+
+        .info-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .info-value {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--accent-color);
+        }
+
+        .config-form {
+            padding: 30px;
+        }
+
+        .form-section {
+            margin-bottom: 30px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            border: 1px solid var(--border-color);
+        }
+
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--accent-color);
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 15px;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .form-row:last-child {
+            margin-bottom: 0;
+        }
+
+        label {
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        input[type="text"],
+        input[type="password"],
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            background: var(--accent-bg);
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        input[type="text"]:focus,
+        input[type="password"]:focus,
+        input[type="number"]:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 2px rgba(0, 255, 65, 0.2);
+        }
+
+        input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            accent-color: var(--accent-color);
+        }
+
+        .checkbox-row {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, var(--accent-color), #00d4ff);
+            color: var(--primary-bg);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 255, 65, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--accent-bg);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border-color);
+            transform: translateY(-2px);
+        }
+
+        .back-link {
+            color: var(--accent-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            display: inline-block;
+        }
+
+        .back-link:hover {
+            color: #00d4ff;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 5px;
+            }
+            
+            .device-info {
+                grid-template-columns: 1fr;
+            }
+            
+            .buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="/" class="back-link">← Back to Monitor</a>
+            <h1>Device Configuration</h1>
+        </div>
+
+        <div class="device-info">
+            <div class="info-item">
+                <div class="info-label">IP Address</div>
+                <div class="info-value">{{ device_ip }}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Board Type</div>
+                <div class="info-value">{{ device.board_type or 'Unknown' }}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Version</div>
+                <div class="info-value">{{ device.version or 'Unknown' }}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Status</div>
+                <div class="info-value">{{ 'Online' if device.is_online else 'Offline' }}</div>
+            </div>
+        </div>
+
+        <form id="configForm" class="config-form">
+            <div class="form-section">
+                <div class="section-title">WiFi Configuration</div>
+                <div class="form-row">
+                    <label for="wifi_ssid">SSID:</label>
+                    <input type="text" id="wifi_ssid" name="WiFiSSID" value="{{ config.get('WiFiSSID', 'NMTech-2.4G') }}" required>
+                </div>
+                <div class="form-row">
+                    <label for="wifi_password">Password:</label>
+                    <input type="password" id="wifi_password" name="WiFiPWD" value="{{ config.get('WiFiPWD', 'NMMiner2048') }}" required>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <div class="section-title">Primary Pool</div>
+                <div class="form-row">
+                    <label for="primary_pool">Pool URL:</label>
+                    <input type="text" id="primary_pool" name="PrimaryPool" value="{{ config.get('PrimaryPool', 'stratum+tcp://public-pool.io:21496') }}" required>
+                </div>
+                <div class="form-row">
+                    <label for="primary_password">Pool Password:</label>
+                    <input type="text" id="primary_password" name="PrimaryPassword" value="{{ config.get('PrimaryPassword', 'x') }}">
+                </div>
+                <div class="form-row">
+                    <label for="primary_address">BTC Address:</label>
+                    <input type="text" id="primary_address" name="PrimaryAddress" value="{{ config.get('PrimaryAddress', '18dK8EfyepKuS74fs27iuDJWoGUT4rPto1') }}" required>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <div class="section-title">Secondary Pool</div>
+                <div class="form-row">
+                    <label for="secondary_pool">Pool URL:</label>
+                    <input type="text" id="secondary_pool" name="SecondaryPool" value="{{ config.get('SecondaryPool', 'stratum+tcp://pool.tazmining.ch:33333') }}">
+                </div>
+                <div class="form-row">
+                    <label for="secondary_password">Pool Password:</label>
+                    <input type="text" id="secondary_password" name="SecondaryPassword" value="{{ config.get('SecondaryPassword', 'x') }}">
+                </div>
+                <div class="form-row">
+                    <label for="secondary_address">BTC Address:</label>
+                    <input type="text" id="secondary_address" name="SecondaryAddress" value="{{ config.get('SecondaryAddress', '18dK8EfyepKuS74fs27iuDJWoGUT4rPto1') }}">
+                </div>
+            </div>
+
+            <div class="form-section">
+                <div class="section-title">Device Settings</div>
+                <div class="form-row">
+                    <label for="timezone">Timezone:</label>
+                    <input type="number" id="timezone" name="Timezone" value="{{ config.get('Timezone', 8) }}" min="-12" max="12">
+                </div>
+                <div class="form-row">
+                    <label for="ui_refresh">UI Refresh (s):</label>
+                    <input type="number" id="ui_refresh" name="UIRefresh" value="{{ config.get('UIRefresh', 2) }}" min="1" max="60">
+                </div>
+                <div class="form-row">
+                    <label for="screen_timeout">Screen Timeout (s):</label>
+                    <input type="number" id="screen_timeout" name="ScreenTimeout" value="{{ config.get('ScreenTimeout', 60) }}" min="0" max="3600">
+                </div>
+                <div class="form-row">
+                    <label for="brightness">Brightness (%):</label>
+                    <input type="number" id="brightness" name="Brightness" value="{{ config.get('Brightness', 100) }}" min="0" max="100">
+                </div>
+                
+                <div class="checkbox-row">
+                    <input type="checkbox" id="save_uptime" name="SaveUptime" {{ 'checked' if config.get('SaveUptime', True) else '' }}>
+                    <label for="save_uptime">Save uptime, best diff, shares in NVS</label>
+                </div>
+                <div class="checkbox-row">
+                    <input type="checkbox" id="led_enable" name="LedEnable" {{ 'checked' if config.get('LedEnable', True) else '' }}>
+                    <label for="led_enable">LED Enable</label>
+                </div>
+                <div class="checkbox-row">
+                    <input type="checkbox" id="rotate_screen" name="RotateScreen" {{ 'checked' if config.get('RotateScreen', False) else '' }}>
+                    <label for="rotate_screen">Rotate Screen</label>
+                </div>
+                <div class="checkbox-row">
+                    <input type="checkbox" id="btc_price" name="BTCPrice" {{ 'checked' if config.get('BTCPrice', False) else '' }}>
+                    <label for="btc_price">BTC Price Update from Market</label>
+                </div>
+                <div class="checkbox-row">
+                    <input type="checkbox" id="auto_brightness" name="AutoBrightness" {{ 'checked' if config.get('AutoBrightness', True) else '' }}>
+                    <label for="auto_brightness">Auto Brightness</label>
+                </div>
+            </div>
+
+            <div class="buttons">
+                <button type="submit" class="btn btn-primary">Save Configuration</button>
+                <a href="/" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('configForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const config = {};
+            
+            // Convert form data to configuration object
+            for (let [key, value] of formData.entries()) {
+                if (key.includes('Timezone') || key.includes('UIRefresh') || key.includes('ScreenTimeout') || key.includes('Brightness')) {
+                    config[key] = parseInt(value);
+                } else {
+                    config[key] = value;
+                }
+            }
+            
+            // Handle checkboxes (they won't be in formData if unchecked)
+            const checkboxes = ['SaveUptime', 'LedEnable', 'RotateScreen', 'BTCPrice', 'AutoBrightness'];
+            checkboxes.forEach(checkbox => {
+                config[checkbox] = document.getElementById(checkbox.toLowerCase()).checked;
+            });
+            
+            // Add IP to config
+            config.IP = '{{ device_ip }}';
+            
+            try {
+                const response = await fetch('/api/config/{{ device_ip }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(config)
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok && result.success) {
+                    await Swal.fire({
+                        title: 'Success!',
+                        text: 'Configuration sent successfully!',
+                        icon: 'success',
+                        confirmButtonText: 'OK'
+                    });
+                    window.location.href = '/';
+                } else {
+                    await Swal.fire({
+                        title: 'Error',
+                        text: result.error || 'Failed to send configuration',
+                        icon: 'error',
+                        confirmButtonText: 'OK'
+                    });
+                }
+            } catch (error) {
+                await Swal.fire({
+                    title: 'Error',
+                    text: 'Network error: ' + error.message,
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+            }
+        });
+    </script>
+</body>
+</html>
